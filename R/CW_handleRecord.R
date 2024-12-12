@@ -1,3 +1,10 @@
+#' CW_handleRecord
+#'
+#' @param chkDf  default is \code{NULL}.  This is the dataframe object being submitted to this function.
+#' @param layer_name   default is \code{NULL}
+#' @param ...  Additional arguments passed on to other functions.
+#'
+#' @return list
 CW_handleRecord <- function(chkDf=NULL,layer_name = NULL,...){
   func_params <- list(...)
   params <- override_params(func_params)
@@ -17,7 +24,7 @@ CW_handleRecord <- function(chkDf=NULL,layer_name = NULL,...){
   }else{
     output_messages <- c(output_messages,params$lineSep,
                          "NAFO Check: The following records report a NAFO area that does not match the coordinates")  
-    badNafo_output <- capture.output(write.table(badNAFOS[,c("ID", "LATITUDE INIT","LONGITUDE INIT","LAT_DD_QC", "LON_DD_QC","NAFO AREA","NAFO_CALC_QC")], sep = "\t", row.names = FALSE, quote = FALSE))
+    badNafo_output <- utils::capture.output(utils::write.table(badNAFOS[,c("ID", "LATITUDE INIT","LONGITUDE INIT","LAT_DD_QC", "LON_DD_QC","NAFO AREA","NAFO_CALC_QC")], sep = "\t", row.names = FALSE, quote = FALSE))
     output_messages <- c(output_messages, badNafo_output)
     issues <- issues + 1
   }
@@ -29,7 +36,7 @@ CW_handleRecord <- function(chkDf=NULL,layer_name = NULL,...){
   }else{
     output_messages <- c(output_messages, params$lineSep,
                          "Clam Fishing Area Check: The following records indicated fishing activity, but are outside of the known fishing areas")  
-    cfaFishing_output <- capture.output(write.table(cfaCheck[,c("ID", "LATITUDE INIT","LONGITUDE INIT","LAT_DD_QC", "LON_DD_QC","BLADE WIDTH","AVG TIME PER TOW", "WATER PRESSURE", "AVG_BLADE_DEPTH")], sep = "\t", row.names = FALSE, quote = FALSE))
+    cfaFishing_output <- utils::capture.output(utils::write.table(cfaCheck[,c("ID", "LATITUDE INIT","LONGITUDE INIT","LAT_DD_QC", "LON_DD_QC","BLADE WIDTH","AVG TIME PER TOW", "WATER PRESSURE", "AVG_BLADE_DEPTH")], sep = "\t", row.names = FALSE, quote = FALSE))
     output_messages <- c(output_messages, cfaFishing_output)
     issues <- issues + 1
   }
@@ -37,13 +44,13 @@ CW_handleRecord <- function(chkDf=NULL,layer_name = NULL,...){
     message("Skipped vms extraction since offline==T")
   }else{
     vmsRecs <- df.diff(chkDf,invalidVessRet) #only valid vessels
-    vmsRecs<- vmsRecs %>%
-      filter(isFishing == TRUE) %>% 
-      group_by(CFV) %>%
-      summarise(
-        MinDate = min(`RECORD DATE`, na.rm = TRUE),
-        MaxDate = max(`RECORD DATE`, na.rm = TRUE)
-      ) %>% as.data.frame()
+    vmsRecs<- vmsRecs |>
+      dplyr::filter(rlang::.data$isFishing == TRUE) |> 
+      dplyr::group_by(.data$CFV) |>
+      dplyr::summarise(
+        MinDate = min(.data$`RECORD DATE`, na.rm = TRUE),
+        MaxDate = max(.data$`RECORD DATE`, na.rm = TRUE)
+      ) |> as.data.frame()
     creds<- getCreds(clam.username = params$clam.username,clam.password = params$clam.password,clam.dsn = params$clam.dsn, usepkg = params$usepkg)
     vmsRecs <- suppressMessages(Mar.utils::VMS_get_recs(fn.oracle.username = creds$us,fn.oracle.password = creds$pw,fn.oracle.dsn = creds$dsn,usepkg = creds$pkg, 
                                        dateStart = vmsRecs$MinDate, dateEnd = vmsRecs$MaxDate ,vrnList = vmsRecs$CFV))

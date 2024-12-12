@@ -1,3 +1,9 @@
+#' CW_fields_QC
+#'
+#' @param file default is \code{NULL}.  This is the path to a CW-submitted file.
+#' @param ...  Additional arguments passed on to other functions.
+#'
+#' @return list
 CW_fields_QC <- function(file = NULL, ...){
   func_params <- list(...)
   params <- override_params(func_params)
@@ -142,7 +148,7 @@ CW_fields_QC <- function(file = NULL, ...){
   }else if (all(recdCFVs %in% knownCFVs)& nrow(invalidVessRet)>0){
     output_messages <- c(output_messages, params$lineSep,
                          "CFV check: Ocean Concord (133542) is retired")
-    invalidVessRet_output <- capture.output(write.table(invalidVessRet[,c("ID","CFV")], sep = "\t", row.names = FALSE))
+    invalidVessRet_output <- utils::capture.output(utils::write.table(invalidVessRet[,c("ID","CFV")], sep = "\t", row.names = FALSE))
     output_messages <- c(output_messages, invalidVessRet_output)
     issues <- issues + 1
   }else{
@@ -151,7 +157,7 @@ CW_fields_QC <- function(file = NULL, ...){
                          "CFV check: The following invalid CFVs were found")
     invalidCFVs <- chkDf[chkDf$CFV %in% invalidCFVs, ]
     invalidCFVs <- data.frame(INVALID_CFV = invalidCFVs$CFV, ID = invalidCFVs$ID)
-    invalidCFV_output <- capture.output(write.table(invalidCFVs, sep = "\t", row.names = FALSE))
+    invalidCFV_output <- utils::capture.output(utils::write.table(invalidCFVs, sep = "\t", row.names = FALSE))
     output_messages <- c(output_messages, invalidCFV_output)
     issues <- issues + 1
   }
@@ -176,7 +182,7 @@ CW_fields_QC <- function(file = NULL, ...){
     }else{
       output_messages <- c(output_messages, params$lineSep,
                            "DATE Check: The following ID(s) are instances where dates are invalid, or the activity order is incorrect:")  
-      invalid_date_output <- capture.output(write.table(badDates[,c("ID", "SAIL DATE", "FISHING START DATE", "FISHING END DATE","RETURN DATE"),drop=F], sep = "\t", row.names = FALSE, quote = FALSE))
+      invalid_date_output <- utils::capture.output(utils::write.table(badDates[,c("ID", "SAIL DATE", "FISHING START DATE", "FISHING END DATE","RETURN DATE"),drop=F], sep = "\t", row.names = FALSE, quote = FALSE))
       output_messages <- c(output_messages, invalid_date_output)
       issues <- issues + 1
     }
@@ -201,7 +207,7 @@ CW_fields_QC <- function(file = NULL, ...){
     }else{
       output_messages <- c(output_messages, params$lineSep,
                            "TIME Check: The following ID(s) are instances where times are invalid, or the activity order is incorrect:")  
-      invalid_time_output <- capture.output(write.table(badTimes[,c("ID", "SAIL TIME", "FISHING START TIME", "FISHING END TIME","RETURN TIME"),drop=F], sep = "\t", row.names = FALSE, quote = FALSE))
+      invalid_time_output <- utils::capture.output(utils::write.table(badTimes[,c("ID", "SAIL TIME", "FISHING START TIME", "FISHING END TIME","RETURN TIME"),drop=F], sep = "\t", row.names = FALSE, quote = FALSE))
       output_messages <- c(output_messages, invalid_time_output)
       
       issues <- issues + 1
@@ -220,7 +226,7 @@ CW_fields_QC <- function(file = NULL, ...){
     }else{
       output_messages <- c(output_messages, params$lineSep,
                            "DATE & TIME Check: The following records include cases where a reported TIME is on a different day than the correspondingly reported DATE:")  
-      invalid_timeDate_output <- capture.output(write.table(invalidDateTimes[,c("ID", "SAIL DATE", "SAIL TIME", "FISHING START DATE", "FISHING START TIME", "FISHING END DATE", "FISHING END TIME","RETURN DATE", "RETURN TIME"),drop=F], sep = "\t", row.names = FALSE, quote = FALSE))
+      invalid_timeDate_output <- utils::capture.output(utils::write.table(invalidDateTimes[,c("ID", "SAIL DATE", "SAIL TIME", "FISHING START DATE", "FISHING START TIME", "FISHING END DATE", "FISHING END TIME","RETURN DATE", "RETURN TIME"),drop=F], sep = "\t", row.names = FALSE, quote = FALSE))
       output_messages <- c(output_messages, invalid_timeDate_output)
       
       issues <- issues + 1
@@ -240,7 +246,7 @@ CW_fields_QC <- function(file = NULL, ...){
   }else{
     output_messages <- c(output_messages, params$lineSep,
                          "TRIP NO check: The following invalid TRIP NOs were found:")
-    invalid_tripno_output <- capture.output( write.table(invalidTripNos[,c("ID", "TRIP YEAR", "TRIP NO")], sep = "\t", row.names = FALSE, quote = FALSE))
+    invalid_tripno_output <- utils::capture.output( utils::write.table(invalidTripNos[,c("ID", "TRIP YEAR", "TRIP NO")], sep = "\t", row.names = FALSE, quote = FALSE))
     output_messages <- c(output_messages, invalid_tripno_output)
     issues <- issues + 1
   }
@@ -254,7 +260,7 @@ CW_fields_QC <- function(file = NULL, ...){
     }else{
       output_messages <- c(output_messages, params$lineSep,
                            "RECORD DATE check: The following invalid RECORD DATE were found:")  
-      invalid_RecDate_output <- capture.output( write.table(badRecDate[,c("ID","RECORD DATE")], sep = "\t", row.names = FALSE, quote = FALSE))
+      invalid_RecDate_output <- utils::capture.output( utils::write.table(badRecDate[,c("ID","RECORD DATE")], sep = "\t", row.names = FALSE, quote = FALSE))
       output_messages <- c(output_messages, invalid_RecDate_output)
       issues <- issues + 1
     }
@@ -271,13 +277,13 @@ CW_fields_QC <- function(file = NULL, ...){
     }else{
       output_messages <- c(output_messages, params$lineSep,
                            "RECORD NO & RECORD TIME check: The following records have an invalid values of either RECORD NO or RECORD TIME:")  
-      invalid_RecDate_output <- capture.output( write.table(badRecNoTime[,c("ID","CFV", "TRIP YEAR", "TRIP NO","RECORD NO","RECORD DATE","RECORD TIME", "isFishing")], sep = "\t", row.names = FALSE, quote = FALSE))
+      invalid_RecDate_output <- utils::capture.output( utils::write.table(badRecNoTime[,c("ID","CFV", "TRIP YEAR", "TRIP NO","RECORD NO","RECORD DATE","RECORD TIME", "isFishing")], sep = "\t", row.names = FALSE, quote = FALSE))
       output_messages <- c(output_messages, invalid_RecDate_output)
       issues <- issues + 1
     }
   }else if("RECORD TIME" %in% names(chkDf)){
     ## RECORD TIME
-    recTime_result <- check_field_values(chkDf, "RECORD TIME", c(0,600,1200,1800), output_messages, show.passed.checks, issues, params$lineSep)
+    recTime_result <- check_field_values(chkDf, "RECORD TIME", c(0,600,1200,1800), output_messages, params$show.passed.checks, issues, params$lineSep)
     output_messages <- recTime_result$output_messages
     issues <- recTime_result$issues
   }
@@ -291,7 +297,7 @@ CW_fields_QC <- function(file = NULL, ...){
     nPerfect <- nrow(perfectWidth)
     nNA <- nrow(naBladeWidth)
     if (nNA > 0) {
-      # naBlade_output <- capture.output( write.table(naBladeWidth[,c("ID","CFV", "TRIP YEAR", "TRIP NO","RECORD NO","RECORD DATE","RECORD TIME", "BLADE WIDTH")], sep = "\t", row.names = FALSE, quote = FALSE))
+      # naBlade_output <- utils::capture.output( utils::write.table(naBladeWidth[,c("ID","CFV", "TRIP YEAR", "TRIP NO","RECORD NO","RECORD DATE","RECORD TIME", "BLADE WIDTH")], sep = "\t", row.names = FALSE, quote = FALSE))
       # 
       # naBladeMsg <- paste0("\tNA check: The following records have no value entered for blade width:\n\t",
       #                      naBlade_output) 
@@ -324,7 +330,7 @@ CW_fields_QC <- function(file = NULL, ...){
     }else{
       output_messages <- c(output_messages, params$lineSep,
                            "AVG TIME PER TOW Check: The following rows indicate suggest more than 6hrs of towing:")  
-      avgTimePerTow_output <- capture.output(write.table(avgTimePerTowCheck[,c("ID","ONE DREDGE TOWS", "TWO DREDGE TOWS", "THREE DREDGE TOWS","AVG TIME PER TOW","avgTimePerTowCheck")], sep = "\t", row.names = FALSE, quote = FALSE))
+      avgTimePerTow_output <- utils::capture.output(utils::write.table(avgTimePerTowCheck[,c("ID","ONE DREDGE TOWS", "TWO DREDGE TOWS", "THREE DREDGE TOWS","AVG TIME PER TOW","avgTimePerTowCheck")], sep = "\t", row.names = FALSE, quote = FALSE))
       output_messages <- c(output_messages, avgTimePerTow_output)
       issues <- issues + 1
     }
@@ -336,7 +342,7 @@ CW_fields_QC <- function(file = NULL, ...){
     }else{
       output_messages <- c(output_messages, params$lineSep,
                            "Dredge Number Check: The following records indicated that 50 or more dredges occurred")  
-      dredgeNo_output <- capture.output(write.table(dredgeNoCheck[,c("ONE DREDGE TOWS", "TWO DREDGE TOWS", "THREE DREDGE TOWS")], sep = "\t", row.names = FALSE, quote = FALSE))
+      dredgeNo_output <- utils::capture.output(utils::write.table(dredgeNoCheck[,c("ONE DREDGE TOWS", "TWO DREDGE TOWS", "THREE DREDGE TOWS")], sep = "\t", row.names = FALSE, quote = FALSE))
       output_messages <- c(output_messages, dredgeNo_output)
       issues <- issues + 1
     }
@@ -350,7 +356,7 @@ CW_fields_QC <- function(file = NULL, ...){
     }else{
       output_messages <- c(output_messages, params$lineSep,
                            "Dredge Tow Number Check: The following records have a value for a dredge tow, but no other indication of fishing")  
-      dredgeTowNo_output <- capture.output(write.table(dredgeTowNoCheck[,c("ID", "ONE DREDGE TOWS", "TWO DREDGE TOWS", "THREE DREDGE TOWS","BLADE WIDTH","AVG TIME PER TOW", "WATER PRESSURE", "AVG_BLADE_DEPTH")], sep = "\t", row.names = FALSE, quote = FALSE))
+      dredgeTowNo_output <- utils::capture.output(utils::write.table(dredgeTowNoCheck[,c("ID", "ONE DREDGE TOWS", "TWO DREDGE TOWS", "THREE DREDGE TOWS","BLADE WIDTH","AVG TIME PER TOW", "WATER PRESSURE", "AVG_BLADE_DEPTH")], sep = "\t", row.names = FALSE, quote = FALSE))
       output_messages <- c(output_messages, dredgeTowNo_output)
       issues <- issues + 1
     }
@@ -378,7 +384,7 @@ CW_fields_QC <- function(file = NULL, ...){
     }else{
       output_messages <- c(output_messages,params$lineSep,
                            "ITIS/Product_ID Check: The following records report a product ID that is not expected for the species")  
-      badITIS_PRODUCT_output <- capture.output(write.table(ITIS_PRODUCT_MISMATCH[,c("ID", "ITIS CODE","PRODUCT ID","WEIGHT")], sep = "\t", row.names = FALSE, quote = FALSE))
+      badITIS_PRODUCT_output <- utils::capture.output(utils::write.table(ITIS_PRODUCT_MISMATCH[,c("ID", "ITIS CODE","PRODUCT ID","WEIGHT")], sep = "\t", row.names = FALSE, quote = FALSE))
       output_messages <- c(output_messages, badITIS_PRODUCT_output)
       issues <- issues + 1
     }

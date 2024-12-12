@@ -1,3 +1,23 @@
+#' clamCW_QC_file
+#' While normally run via \code{clamQC()}, this function can be used to analyze 
+#' a single CW file. 
+#' @param file  default is \code{NULL}
+#' @param layerPrefix  default is \code{NULL}
+#' @param ...  Additional arguments passed on to other functions.
+#'
+#' @return list
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' productFile <- clamCW_QC_file(file = "C:/Original CW Log Data/2022/2022AE Q1&Q2/Product.xlsx", 
+#'                               rightNow = Sys.time(), 
+#'                               layerPrefix = "Product_ex")
+#' recordFile  <- clamCW_QC_file(file = "C:/Original CW Log Data/2022/2022AE Q1&Q2/Record.xlsx", 
+#'                               rightNow = Sys.time(), 
+#'                               layerPrefix = "Record_ex")
+#' }
+
 clamCW_QC_file<-function(file = NULL, layerPrefix = NULL, ...){
   func_params <- list(...)
   params <- override_params(func_params)
@@ -18,7 +38,7 @@ clamCW_QC_file<-function(file = NULL, layerPrefix = NULL, ...){
                                                           paste0("Coordinate check:  The following records had issues when an attempt was made to plot them:"))
       droppedRecs <- dplyr::anti_join(this$chkDf, this$chkDf_sf[,names(this$chkDf_sf) %in% names(this$chkDf)], by=names(this$chkDf))
       outFields<- c("ID", "CFV", "TRIP YEAR", "TRIP NO", "SAMPLE DATE", "SAMPLE TOW TIME", "TIME","LATITUDE INIT","LONGITUDE INIT" )
-      droppedRecs_output <- capture.output(write.table(droppedRecs[,names(droppedRecs)%in% outFields], sep = "\t", row.names = FALSE, quote = FALSE))
+      droppedRecs_output <- utils::capture.output(utils::write.table(droppedRecs[,names(droppedRecs)%in% outFields], sep = "\t", row.names = FALSE, quote = FALSE))
       this$output_messages <- c(this$output_messages, droppedRecs_output)
       this$issues <- this$issues + 1
     }else{

@@ -1,3 +1,17 @@
+#' spatialQC
+#' This function takes a dataframe with coordinates, and for each position, checks
+#' where they are relative to:
+#' 1 - NAFO subunits (Mar.data::NAFOSubunits_sf)
+#' 2 - Surfclam Fishing areas (Mar.data::SurfClamFAs_sf)
+#' 3 - Major offshore banks on the Scotian Shelf (Mar.data::banks_sf)
+#' 4 - Depth contour min and max (Mar.data::Bathy_sf)
+#'
+#' @param chkDf  default is \code{NULL}.  This is the dataframe object being submitted to this function.
+#' @param layerName default is \code{"layer"}
+#' @param ...  Additional arguments passed on to other functions.
+#'
+#' @return This function returns an sf object corresponding with the submitted 
+#' df, but with several extra fields.  It also generates a new layer within a gpkg file.
 spatialQC <- function(chkDf, layerName = "layer", ...){
   func_params <- list(...)
   params <- override_params(func_params)
@@ -26,6 +40,14 @@ spatialQC <- function(chkDf, layerName = "layer", ...){
 }
 
 
+#' addBasemapLayers
+#' This file adds a number of spatial objects to the output gpkg file, such as
+#' landing locations, offshore banks, surfclam fishing areas, NAFO areas, and 
+#' bathymetry. 
+#' @param ...  Additional arguments passed on to other functions.
+#'
+#' @return This function does not return a value. It writes layers to a gpkg file which is output to a specified directory.
+#' @export
 addBasemapLayers <- function(...){
   func_params <- list(...)
   params <- override_params(func_params)

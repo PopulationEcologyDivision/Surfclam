@@ -1,4 +1,13 @@
-CW_generic_QC <- function(df = NULL, output_messages=output_messages, issues= issues,...){
+#' CW_generic_QC
+#' This function runs a number of checks to ensure that values from the CW files
+#' are within acceptable ranges
+#' @param df  default is \code{NULL}.  This is the dataframe object being submitted to this function.
+#' @param output_messages    default is \code{NULL}
+#' @param issues    default is \code{NULL}
+#' @param ...  Additional arguments passed on to other functions.
+#'
+#' @return list
+CW_generic_QC <- function(df = NULL, output_messages=NULL, issues= NULL,...){
   func_params <- list(...)
   params <- override_params(func_params)
   if (params$debug) Mar.utils::where_now()

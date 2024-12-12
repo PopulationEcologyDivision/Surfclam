@@ -1,3 +1,15 @@
+#' clamLog_QC_file
+#' This function extracts and reformats the contents of xlsx Log files so they 
+#' can be compared by other functions within this package.
+#' @param file  default is \code{NULL}.  This is the path to a Log (xlsx) file.
+#' @param output  default is \code{NULL}
+#' @param issues  default is \code{NULL}
+#' @param ...  Additional arguments passed on to other functions.
+#' @examples
+#' \dontrun{
+#' logFile <- clamLog_QC_file(file ="C:/R Cdn Clam DFO Log- Jan-5-8 2023.xlsx" )
+#' } 
+#' @return data.frame
 clamLog_QC_file <- function(file = NULL, output = NULL, issues = NULL,...){
   func_params <- list(...)
   params <- override_params(func_params)
@@ -42,9 +54,9 @@ clamLog_QC_file <- function(file = NULL, output = NULL, issues = NULL,...){
   
   
   xl_dat$POS_convert <- xl_dat$POS
-  xl_dat <- tidyr::separate(xl_dat, POS_convert, into = c("LATITUDE INIT", "LONGITUDE INIT"), sep = "\\s[NW]\\s", extra = "merge")
-  xl_dat$`LATITUDE INIT` <- gsub(" º ", "", xl_dat$`LATITUDE INIT`)
-  xl_dat$`LONGITUDE INIT` <- gsub(" º ", "", xl_dat$`LONGITUDE INIT`)
+  xl_dat <- tidyr::separate(xl_dat, "POS_convert", into = c("LATITUDE INIT", "LONGITUDE INIT"), sep = "\\s[NW]\\s", extra = "merge")
+  xl_dat$`LATITUDE INIT` <- gsub(" \u00B0 ", "", xl_dat$`LATITUDE INIT`)
+  xl_dat$`LONGITUDE INIT` <- gsub(" \u00B0 ", "", xl_dat$`LONGITUDE INIT`)
   xl_dat$`LONGITUDE INIT` <- gsub(" W", "", xl_dat$`LONGITUDE INIT`)
   
   log_data <- merge(xl_meta_cln, xl_dat, all = TRUE)

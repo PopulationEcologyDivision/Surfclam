@@ -6,13 +6,15 @@ Author: Mike McMahon <Mike.McMahon@dfo-mpo.gc.ca>
 Maintainer: Mike McMahon <Mike.McMahon@dfo-mpo.gc.ca>
 Description: All things surfclam.
 Depends:
-    R (>= 2.10)
+    R (>= 4.1.0)
 Imports:
     dplyr,
-    sf,
     Mar.data,
     Mar.utils,
-    openxlsx2
+    openxlsx2,
+    rlang, 
+    sf,
+    tidyr
 Remotes:
     Maritimes/Mar.utils,
     Maritimes/Mar.data

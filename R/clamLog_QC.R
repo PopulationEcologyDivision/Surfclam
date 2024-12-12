@@ -1,3 +1,10 @@
+#' clamLog_QC
+#'
+#' @param logFolder  default is \code{NULL}
+#' @param ...  Additional arguments passed on to other functions.
+#'
+#' @return data.frame
+#' @export
 clamLog_QC <- function(logFolder = NULL, ...){
   func_params <- list(...)
   params <- override_params(func_params)
@@ -49,7 +56,7 @@ clamLog_QC <- function(logFolder = NULL, ...){
     output_gen_LOG <- c(output_gen_LOG, params$lineSep,
                         paste0("Plotting the log files:  The following records had issues when an attempt was made to plot them:"))
     droppedRecs <- dplyr::anti_join(all_log, chkDf_sf[,names(chkDf_sf) %in% names(all_log)], by = names(all_log))
-    droppedRecs_output <- capture.output(write.table(droppedRecs[,c("TRIP YEAR","TRIPNO", "DATE", "TIME","LATITUDE INIT","LONGITUDE INIT", "FILE", "isFishing")], sep = "\t", row.names = FALSE, quote = FALSE))
+    droppedRecs_output <- utils::capture.output(utils::write.table(droppedRecs[,c("TRIP YEAR","TRIPNO", "DATE", "TIME","LATITUDE INIT","LONGITUDE INIT", "FILE", "isFishing")], sep = "\t", row.names = FALSE, quote = FALSE))
     output_gen_LOG <- c(output_gen_LOG, droppedRecs_output)
     issues_gen_LOG <- issues_gen_LOG + 1
     
@@ -59,13 +66,13 @@ clamLog_QC <- function(logFolder = NULL, ...){
   if (params$offline){
     message("Skipped vms extraction since offline==T")
   }else{
-    vmsRecs<- all_log %>%
-      filter(isFishing == TRUE) %>% 
-      group_by(VRN) %>%
-      summarise(
-        MinDate = min(`DATE`, na.rm = TRUE),
-        MaxDate = max(`DATE`, na.rm = TRUE)
-      ) %>% as.data.frame()
+    vmsRecs<- all_log |>
+      dplyr::filter(.data$isFishing == TRUE) |> 
+      dplyr::group_by(.data$VRN) |>
+      dplyr::summarise(
+        MinDate = min(.data$`DATE`, na.rm = TRUE),
+        MaxDate = max(.data$`DATE`, na.rm = TRUE)
+      ) |> as.data.frame()
     creds<- getCreds(clam.username = params$clam.username,clam.password = params$clam.password,clam.dsn = params$clam.dsn, usepkg = params$usepkg)
     vmsRecs <- suppressMessages(Mar.utils::VMS_get_recs(fn.oracle.username = creds$us,fn.oracle.password = creds$pw,fn.oracle.dsn = creds$dsn,usepkg = creds$pkg, 
                                        dateStart = vmsRecs$MinDate, dateEnd = vmsRecs$MaxDate ,vrnList = vmsRecs$VRN))
@@ -74,7 +81,7 @@ clamLog_QC <- function(logFolder = NULL, ...){
     
   }
   theName <- paste0("QC_spatial_Logs.csv")
-  write.csv(x = all_log, file.path(params$resultsFolder,theName))
+  utils::write.csv(x = all_log, file.path(params$resultsFolder,theName))
   message("Wrote a single csv for the logbook data  with coords in decimal degrees to ",file.path(params$resultsFolder,theName))
   
   writeLines(output_gen_LOG, con = output_gen_LOG_File)

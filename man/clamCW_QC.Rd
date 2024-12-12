@@ -2,32 +2,18 @@
 % Please edit documentation in R/clamCW_QC.R
 \name{clamCW_QC}
 \alias{clamCW_QC}
-\title{Within this loop, we review the contents of each of the different file types (e.g. product, record, etc)
-- do some generic checks (CW_fields_QC())
-- (can) do file-specific checks 
-   e.g. CW_handleRecord() generates some spatial files based on the provided coords
--  capture the contents into the global environ so we don't have to reload the file again
-- write the output to file-specific qc files
-Since we have all of the various files accessible, we can do pairwise comparisons (merges) for all of them
-this allows for identification of fields that contain values that prevent files from joining
- - note that the attempted merging of files:
-     1 - ignores all fields that contain NAs;
-     2 - ignores ID fields since they are unique to each file; and 
-     3 - ignores 'WEIGHT KG' field, since in one file it may reflect a single species, but might include multiple spp in another}
+\title{clamCW_QC}
 \usage{
 clamCW_QC(cwFolder = NULL, ...)
 }
+\arguments{
+\item{cwFolder}{default is \code{NULL}}
+
+\item{...}{Additional arguments passed on to other functions.}
+}
+\value{
+This function does not return a value. It writes output files to the specified directory.
+}
 \description{
-Within this loop, we review the contents of each of the different file types (e.g. product, record, etc)
-- do some generic checks (CW_fields_QC())
-- (can) do file-specific checks 
-   e.g. CW_handleRecord() generates some spatial files based on the provided coords
--  capture the contents into the global environ so we don't have to reload the file again
-- write the output to file-specific qc files
-Since we have all of the various files accessible, we can do pairwise comparisons (merges) for all of them
-this allows for identification of fields that contain values that prevent files from joining
- - note that the attempted merging of files:
-     1 - ignores all fields that contain NAs;
-     2 - ignores ID fields since they are unique to each file; and 
-     3 - ignores 'WEIGHT KG' field, since in one file it may reflect a single species, but might include multiple spp in another
+clamCW_QC
 }

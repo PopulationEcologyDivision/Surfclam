@@ -1,3 +1,12 @@
+#' checkCaptain
+#'  This function helps verify that the reported captains are valid for  the vessels 
+#'  they are piloting
+#' @param chkDf  default is \code{NULL}.  This is the dataframe object being submitted to this function.
+#' @param output_messages  default is \code{NULL}
+#' @param issues  default is \code{NULL}
+#' @param ...  Additional arguments passed on to other functions.
+#'
+#' @return list
 checkCaptain <- function(chkDf=NULL, output_messages = NULL, issues=NULL, ...){
   func_params <- list(...)
   params <- override_params(func_params)
@@ -19,7 +28,7 @@ checkCaptain <- function(chkDf=NULL, output_messages = NULL, issues=NULL, ...){
   }else{
     output_messages <- c(output_messages, params$lineSep,
                          "CAPTAIN check (existence): The following invalid captains were found:")  
-    invalid_captain_output <- capture.output( write.table(invalidCaptains[,fields], sep = "\t", row.names = FALSE, quote = FALSE))
+    invalid_captain_output <- utils::capture.output( utils::write.table(invalidCaptains[,fields], sep = "\t", row.names = FALSE, quote = FALSE))
     output_messages <- c(output_messages, invalid_captain_output)
     issues <- issues + 1
   }
@@ -37,7 +46,7 @@ checkCaptain <- function(chkDf=NULL, output_messages = NULL, issues=NULL, ...){
     colnames(invalidCaptains2)[colnames(invalidCaptains2)=="START_YEAR"] <- "START_YEAR_OF_CAPTAIN"
     output_messages <- c(output_messages, params$lineSep,
                          "CAPTAIN check (validity): Cases were found where a captain was invalid at the time of the trip:")  
-    invalid_captain2_output <- capture.output( write.table(invalidCaptains2[,c(fields, "START_DATE_OF_CAPTAIN", "TRIP YEAR")], sep = "\t", row.names = FALSE, quote = FALSE))
+    invalid_captain2_output <- utils::capture.output( utils::write.table(invalidCaptains2[,c(fields, "START_DATE_OF_CAPTAIN", "TRIP YEAR")], sep = "\t", row.names = FALSE, quote = FALSE))
     output_messages <- c(output_messages, invalid_captain2_output)
     
     issues <- issues + 1

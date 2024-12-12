@@ -1,3 +1,12 @@
+#' clamCompLogCW
+#' This function compares the contents of the loaded CW and Log files to verify that
+#' the positions correspond, and that the reported weights of the carious products
+#' match between the 2 files.
+#' @param clamCW  default is \code{NULL}
+#' @param clamLog  default is \code{NULL}
+#' @param ...  Additional arguments passed on to other functions.
+#'
+#' @return list
 clamCompLogCW<-function(clamCW=NULL, clamLog=NULL,...){
   func_params <- list(...)
   params <- override_params(func_params)
@@ -12,11 +21,11 @@ clamCompLogCW<-function(clamCW=NULL, clamLog=NULL,...){
   prod <- clamCW$Product
   
   sum_na_rm <- function(x) sum(x, na.rm = TRUE)
-  prod_wide <- prod %>%
-    dplyr::select(-`ID`) %>%
-    dplyr::mutate(`ITIS PRODUCT` = paste(`ITIS CODE`, `PRODUCT ID`, sep = "_")) %>%
-    dplyr::select(-`ITIS CODE`, -`PRODUCT ID`) %>% 
-    tidyr::pivot_wider(names_from = `ITIS PRODUCT`, values_from = `WEIGHT KG`, values_fn = list(`WEIGHT KG` = sum_na_rm)) %>% as.data.frame()
+  prod_wide <- prod|>
+    dplyr::select(-.data$`ID`)|>
+    dplyr::mutate(`ITIS PRODUCT` = paste(.data$`ITIS CODE`, .data$`PRODUCT ID`, sep = "_"))|>
+    dplyr::select(-.data$`ITIS CODE`, -.data$`PRODUCT ID`)|> 
+    tidyr::pivot_wider(names_from = .data$`ITIS PRODUCT`, values_from = .data$`WEIGHT KG`, values_fn = list(`WEIGHT KG` = sum_na_rm))|> as.data.frame()
   
   colnames(rec)[colnames(rec)=="BLADE WIDTH"] <- "BLADE WIDTH_REC"
   colnames(prod_wide)[colnames(prod_wide)=="BLADE WIDTH"] <- "BLADE WIDTH_PROD"
@@ -39,7 +48,7 @@ clamCompLogCW<-function(clamCW=NULL, clamLog=NULL,...){
                       'CW Record/Product Join: The following records contain an unknown issue that did not allow a clean join between the record and product files\n
                          These files are joined on the following fields, and the issue is likely that some contain NA or weird values in one or more of these fields:\n
                          "CFV","TRIP YEAR","TRIP NO","TRIP GEAR ID","RECORD TYPE","RECORD NO","RECORD DATE","SUB TRIP NO" ')  
-    mismatch_output <- capture.output(write.table(mismatched_records, sep = "\t", row.names = FALSE, quote = FALSE))
+    mismatch_output <- utils::capture.output(utils::write.table(mismatched_records, sep = "\t", row.names = FALSE, quote = FALSE))
     output_CWLOG <- c(output_CWLOG, mismatch_output)
     issues_CWLOG <- issues_CWLOG + 1
   }else{
@@ -47,7 +56,7 @@ clamCompLogCW<-function(clamCW=NULL, clamLog=NULL,...){
                       'CW Record/Product Join: The CW Record and Products files joined smoothly')  
   }
   
-  clamLog["RECORD NO"] <- lapply(clamLog["WATCH"], function(x) type.convert(as.character(x), as.is = TRUE))
+  clamLog["RECORD NO"] <- lapply(clamLog["WATCH"], function(x) utils::type.convert(as.character(x), as.is = TRUE))
   clamLog$`RECORD DATE` <- clamLog$DATE
   colnames(clamLog)[colnames(clamLog)=="isFishing"] <- "isFishing_Log"
   colnames(cwRecProdJoin)[colnames(cwRecProdJoin)=="isFishing"] <- "isFishing_CW"
@@ -56,8 +65,8 @@ clamCompLogCW<-function(clamCW=NULL, clamLog=NULL,...){
   wt_chk<-merge(cwRecProdJoin, clamLog, all=T, by = c("TRIP YEAR","RECORD DATE", "RECORD NO", "CFV"))
   log_wt_cols <- c("COOC_COCKLES","SC_BLANCH","SC_CGRADE","COOC_PROPCLAMS","COOC_RECOVERY","COOC_QUAHOGS" )
   cw_wt_cols <- c("80879_16","80983_16","80983_25","81763_23","80983_26","81343_16")
-  wt_chk[log_wt_cols] <- lapply(wt_chk[log_wt_cols], function(x) type.convert(as.character(x), as.is = TRUE))
-  wt_chk[cw_wt_cols] <- lapply(wt_chk[cw_wt_cols], function(x) type.convert(as.character(x), as.is = TRUE))
+  wt_chk[log_wt_cols] <- lapply(wt_chk[log_wt_cols], function(x) utils::type.convert(as.character(x), as.is = TRUE))
+  wt_chk[cw_wt_cols] <- lapply(wt_chk[cw_wt_cols], function(x) utils::type.convert(as.character(x), as.is = TRUE))
   
   wt_chk$TOT_LOG <- round(rowSums(wt_chk[,log_wt_cols], na.rm = T),0)
   wt_chk$TOT_CW <-  round(rowSums(wt_chk[,cw_wt_cols], na.rm = T),0)
@@ -73,7 +82,7 @@ clamCompLogCW<-function(clamCW=NULL, clamLog=NULL,...){
     if(nrow(differentWt)>0){
     output_CWLOG <- c(output_CWLOG, params$lineSep,
                       'CW Record/Product vs Log Weights: The following records have different landed weights between the logbook files and the CW record/products:')  
-    differentWt_output <- capture.output(write.table(differentWt, sep = "\t", row.names = FALSE, quote = FALSE))
+    differentWt_output <- utils::capture.output(utils::write.table(differentWt, sep = "\t", row.names = FALSE, quote = FALSE))
     output_CWLOG <- c(output_CWLOG, differentWt_output)
     issues_CWLOG <- issues_CWLOG + 1
   }else{
@@ -83,7 +92,7 @@ clamCompLogCW<-function(clamCW=NULL, clamLog=NULL,...){
   if(nrow(differentIsFishing)>0){
     output_CWLOG <- c(output_CWLOG, params$lineSep,
                       'CW Record/Product vs Log isFishing: The following records differ in detected fishing activity between the logbook files and the CW record/products:')  
-    differentIsFishing_output <- capture.output(write.table(differentIsFishing, sep = "\t", row.names = FALSE, quote = FALSE))
+    differentIsFishing_output <- utils::capture.output(utils::write.table(differentIsFishing, sep = "\t", row.names = FALSE, quote = FALSE))
     output_CWLOG <- c(output_CWLOG, differentIsFishing_output)
     issues_CWLOG <- issues_CWLOG + 1
   }else{
@@ -92,12 +101,12 @@ clamCompLogCW<-function(clamCW=NULL, clamLog=NULL,...){
   }
   
   unJoinedLogs <- wt_chk[ is.na(wt_chk$`TRIP NO`) & is.na(wt_chk$`RECORD TYPE`),c("TRIP YEAR","RECORD DATE", "TIME","RECORD NO", "CFV", "isFishing_Log", "TOT_LOG","FILE" )]
-  unJoinedCW <- wt_chk[ is.na(wt_chk$VESS_NAME) & is.na(wt_chk$LICENCE),c("TRIP YEAR","RECORD DATE", "RECORD TIME","RECORD NO", "CFV", "isFishing_CW", "TOT_CW")] |> head()
+  unJoinedCW <- wt_chk[ is.na(wt_chk$VESS_NAME) & is.na(wt_chk$LICENCE),c("TRIP YEAR","RECORD DATE", "RECORD TIME","RECORD NO", "CFV", "isFishing_CW", "TOT_CW")] |> utils::head()
   
   if(nrow(unJoinedLogs)>0){
     output_CWLOG <- c(output_CWLOG, params$lineSep,
                       "CW Record/Product vs Log - Unjoined Log Records: The following log records aren't associated with any record/product records:")  
-    unJoinedLogs_output <- capture.output(write.table(unJoinedLogs, sep = "\t", row.names = FALSE, quote = FALSE))
+    unJoinedLogs_output <- utils::capture.output(utils::write.table(unJoinedLogs, sep = "\t", row.names = FALSE, quote = FALSE))
     output_CWLOG <- c(output_CWLOG, unJoinedLogs_output)
     issues_CWLOG <- issues_CWLOG + 1
   }else{
@@ -108,7 +117,7 @@ clamCompLogCW<-function(clamCW=NULL, clamLog=NULL,...){
   if(nrow(unJoinedCW)>0){
     output_CWLOG <- c(output_CWLOG, params$lineSep,
                       "CW Record/Product vs Log - Unjoined record/product Records: The following record/product records aren't associated with any log records:")  
-    unJoinedCW_output <- capture.output(write.table(unJoinedCW, sep = "\t", row.names = FALSE, quote = FALSE))
+    unJoinedCW_output <- utils::capture.output(utils::write.table(unJoinedCW, sep = "\t", row.names = FALSE, quote = FALSE))
     output_CWLOG <- c(output_CWLOG, unJoinedCW_output)
     issues_CWLOG <- issues_CWLOG + 1
   }else{
@@ -118,7 +127,7 @@ clamCompLogCW<-function(clamCW=NULL, clamLog=NULL,...){
   
 
   theName <- paste0("QC_CW_RecProdJoin.csv")
-  write.csv(x =cwRecProdJoin, file.path(params$resultsFolder,theName))
+  utils::write.csv(x =cwRecProdJoin, file.path(params$resultsFolder,theName))
   message("Wrote joined Record/Product csv to ",file.path(params$resultsFolder,theName))
   writeLines(output_CWLOG, con = output_CWLOG_File)
   

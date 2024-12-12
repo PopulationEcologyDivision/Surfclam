@@ -1,4 +1,15 @@
 
+#' CW_check_merge
+#'
+#' @param df1  default is \code{NULL}.  This is the first dataframe object being submitted to this function.
+#' @param df2  default is \code{NULL}.  This is the second dataframe object being submitted to this function.
+#' @param df1_name  default is \code{NULL}.  This is the name of \code{df1}.
+#' @param df2_name  default is \code{NULL}.  This is the name of \code{df2}.
+#' @param output_gen  default is \code{NULL}.
+#' @param issues_gen  default is \code{NULL}.
+#' @param ...  Additional arguments passed on to other functions.
+#'
+#' @return list containing output messages and a count of the number of issues found
 CW_check_merge <- function(df1=NULL, df2=NULL,df1_name=NULL, df2_name=NULL, output_gen=NULL, issues_gen = NULL,...) {
   
   func_params <- list(...)
@@ -54,14 +65,14 @@ CW_check_merge <- function(df1=NULL, df2=NULL,df1_name=NULL, df2_name=NULL, outp
     df2$`RECORD DATE` <-  df2$`SAMPLE DATE`
     renamedSampleDate <- T
   }
-  df1_joins <- df1 %>% select(-intersect(noJoin_cols, names(df1)))
-  df2_joins <- df2 %>% select(-intersect(noJoin_cols, names(df2)))
+  df1_joins <- df1 |>  dplyr::select(-intersect(noJoin_cols, names(df1)))
+  df2_joins <- df2 |>  dplyr::select(-intersect(noJoin_cols, names(df2)))
 
   # Identify the join fields
   join_fields <- intersect(names(df1_joins), names(df2_joins))
   
-  missing_in_df2 <- unique(anti_join(df1_joins, df2_joins, by = join_fields))
-  missing_in_df1 <- unique(anti_join(df2_joins, df1_joins, by = join_fields))
+  missing_in_df2 <- unique(dplyr::anti_join(df1_joins, df2_joins, by = join_fields))
+  missing_in_df1 <- unique(dplyr::anti_join(df2_joins, df1_joins, by = join_fields))
 
 
   if("isFishing" %in% names(df1)){
@@ -90,7 +101,7 @@ CW_check_merge <- function(df1=NULL, df2=NULL,df1_name=NULL, df2_name=NULL, outp
                         paste0("\t", nrow(missing_in_df2), " records from ", df1_name, " cannot be joined due to values in the following field(s): ", 
                                paste0(unmatchable_fields_df2, collapse = ", "),"\n\tUp to 6 of these unjoinable records are shown below:"))
         
-        invalid_outputdf2 <- capture.output(write.table(head(missing_in_df2), sep = "\t", row.names = FALSE, quote = FALSE))
+        invalid_outputdf2 <- utils::capture.output(utils::write.table(utils::head(missing_in_df2), sep = "\t", row.names = FALSE, quote = FALSE))
         output_gen <- c(output_gen, invalid_outputdf2)
       }
     }
@@ -103,7 +114,7 @@ CW_check_merge <- function(df1=NULL, df2=NULL,df1_name=NULL, df2_name=NULL, outp
         output_gen <- c(output_gen,
                         paste0("\t", nrow(missing_in_df1), " records from ", df2_name, " cannot be joined due to values in the following field(s):\n\t\t",
                                paste0(unmatchable_fields_df1, collapse = ", "),"\n\tUp to 6 of these unjoinable records are shown below:"))
-        invalid_outputdf1 <- capture.output(write.table(head(missing_in_df1,5), sep = "\t", row.names = FALSE, quote = FALSE))
+        invalid_outputdf1 <- utils::capture.output(utils::write.table(utils::head(missing_in_df1,5), sep = "\t", row.names = FALSE, quote = FALSE))
         output_gen <- c(output_gen, invalid_outputdf1)
       }
     }
@@ -116,7 +127,7 @@ CW_check_merge <- function(df1=NULL, df2=NULL,df1_name=NULL, df2_name=NULL, outp
     if(nrow(badSampDates)>0){
       output_gen <- c(output_gen,
                       paste0("\tThese SAMPLE DATEs do not fall between the associated FISHING START DATE and RETURN DATE:\n\t\t"))
-      invalid_SampDate_output <- capture.output(write.table(badSampDates, sep = "\t", row.names = FALSE, quote = FALSE))
+      invalid_SampDate_output <- utils::capture.output(utils::write.table(badSampDates, sep = "\t", row.names = FALSE, quote = FALSE))
       output_gen <- c(output_gen, invalid_SampDate_output)
       issues_gen <- issues_gen + 1
     }
@@ -126,7 +137,7 @@ CW_check_merge <- function(df1=NULL, df2=NULL,df1_name=NULL, df2_name=NULL, outp
     if(nrow(badRecDates)>0){
       output_gen <- c(output_gen,
                       paste0("\tThese RECORD DATEs do not fall between the associated FISHING START DATE and RETURN DATE:\n\t\t"))
-      invalid_RecDate_output <- capture.output(write.table(badRecDates, sep = "\t", row.names = FALSE, quote = FALSE))
+      invalid_RecDate_output <- utils::capture.output(utils::write.table(badRecDates, sep = "\t", row.names = FALSE, quote = FALSE))
       output_gen <- c(output_gen, invalid_RecDate_output)
       issues_gen <- issues_gen + 1
     }
@@ -136,7 +147,7 @@ CW_check_merge <- function(df1=NULL, df2=NULL,df1_name=NULL, df2_name=NULL, outp
     if(nrow(bad_recSamp)>0){
       output_gen <- c(output_gen,
                       paste0("\tThese RECORD DATEs do not match the associated SAMPLE DATEs:\n\t\t"))
-      invalid_recSamp_output <- capture.output(write.table(bad_recSamp, sep = "\t", row.names = FALSE, quote = FALSE))
+      invalid_recSamp_output <- utils::capture.output(utils::write.table(bad_recSamp, sep = "\t", row.names = FALSE, quote = FALSE))
       output_gen <- c(output_gen, invalid_recSamp_output)
       issues_gen <- issues_gen + 1
     }
