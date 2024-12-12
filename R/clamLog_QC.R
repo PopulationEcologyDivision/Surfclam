@@ -44,6 +44,10 @@ clamLog_QC <- function(logFolder = NULL, ...){
   colnames(all_log)[colnames(all_log)=="NAFO"] <- "NAFO_ORIG"  
   parts <- strsplit(logFolder, "/")[[1]]
   layerName <- paste("Log",parts[length(parts) - 1], parts[length(parts)], sep = "_")
+
+  all_log$`LATITUDE INIT` <- gsub(" º ", "", all_log$`LATITUDE INIT`)
+  all_log$`LONGITUDE INIT` <- gsub(" º ", "", all_log$`LONGITUDE INIT`)
+
   all_log <- Mar.utils::DDMMx_to_DD(df=all_log, lat.field = "LATITUDE INIT", lon.field = "LONGITUDE INIT", format = "DDMMMM", WestHemisphere = T)
   colnames(all_log)[colnames(all_log)=="LAT_DD"] <- "LAT_DD_QC"
   colnames(all_log)[colnames(all_log)=="LON_DD"] <- "LON_DD_QC"

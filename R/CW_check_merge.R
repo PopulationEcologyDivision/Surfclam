@@ -11,14 +11,14 @@
 #'
 #' @return list containing output messages and a count of the number of issues found
 CW_check_merge <- function(df1=NULL, df2=NULL,df1_name=NULL, df2_name=NULL, output_gen=NULL, issues_gen = NULL,...) {
-  
   func_params <- list(...)
   params <- override_params(func_params)
   if (params$debug) Mar.utils::where_now()
-
+  
   
   output_gen <- c(output_gen,params$lineSep,
                   paste0("Comparing ", df1_name," and ", df2_name,":"))  
+  if (params$debug) message("Comparing ", df1_name," and ", df2_name)
   res <- list()
   
   if  ((df1_name %in% c("Product","Length_Frequency") & df2_name  %in% c("Product","Length_Frequency"))|
@@ -34,23 +34,32 @@ CW_check_merge <- function(df1=NULL, df2=NULL,df1_name=NULL, df2_name=NULL, outp
     res[["issues_gen"]]<- issues_gen
     return(res)
   }
+  if (is.null(df1)|is.null(df2)){
+    if (is.null(df1)){
+      output_gen <- c(output_gen, paste0("\t",df1_name," is missing"))
+    }else{
+      output_gen <- c(output_gen, paste0("\t",df2_name," is missing"))
+    }
+    issues_gen <- issues_gen + 1
+    res[["output_gen"]]<- output_gen
+    res[["issues_gen"]]<- issues_gen
+    return(res)
+  }
   
-  if (params$debug) message("Comparing ", df1_name," and ", df2_name)
-
   #Even if fields have the same name, don't use them to join if they contain values of NA
   noJoin_df1 <- names(df1)[sapply(df1, function(x) any(is.na(x)))]
   noJoin_df2 <- names(df2)[sapply(df2, function(x) any(is.na(x)))]
   #Also, don't join on ID column - it will be different for all files
-
+  
   if (length(noJoin_df1)>0 | length(noJoin_df2)>0){
     output_gen <- c(output_gen,
                     paste0("\tIgnoring the following fields during join attempt because NA values are present:"))
-
+    
     if(length(noJoin_df1)>0) output_gen <- c(output_gen,
                                              paste0("\t\t",df1_name,": ",paste0(noJoin_df1, collapse = ", ")))
-      
+    
     if(length(noJoin_df2)>0) output_gen <- c(output_gen,
-                                            paste0("\t\t",df2_name,": ",paste0(noJoin_df2, collapse = ", ")))
+                                             paste0("\t\t",df2_name,": ",paste0(noJoin_df2, collapse = ", ")))
   }
   noJoin_cols <- unique(c(noJoin_df1, noJoin_df2, "ID","WEIGHT KG","LAT_DD_QC", "LON_DD_QC", "NAFO_CALC_QC", "CLAM_FISHING_AREA", "BANK","isFishing"))
   
@@ -65,16 +74,17 @@ CW_check_merge <- function(df1=NULL, df2=NULL,df1_name=NULL, df2_name=NULL, outp
     df2$`RECORD DATE` <-  df2$`SAMPLE DATE`
     renamedSampleDate <- T
   }
+  
   df1_joins <- df1 |>  dplyr::select(-intersect(noJoin_cols, names(df1)))
   df2_joins <- df2 |>  dplyr::select(-intersect(noJoin_cols, names(df2)))
-
+  
   # Identify the join fields
   join_fields <- intersect(names(df1_joins), names(df2_joins))
   
   missing_in_df2 <- unique(dplyr::anti_join(df1_joins, df2_joins, by = join_fields))
   missing_in_df1 <- unique(dplyr::anti_join(df2_joins, df1_joins, by = join_fields))
-
-
+  
+  
   if("isFishing" %in% names(df1)){
     df1<- df1[df1$isFishing==T,]
     output_gen <- c(output_gen,
@@ -89,7 +99,7 @@ CW_check_merge <- function(df1=NULL, df2=NULL,df1_name=NULL, df2_name=NULL, outp
   unified_df<- merge(df1_joins, df2_joins, by = join_fields)
   if (nrow(missing_in_df2) == 0 & nrow(missing_in_df1) == 0) {
     if(params$show.passed.checks)  output_gen <- c(output_gen,
-                    paste0("\tThe two files can be merged successfully without losing any records."))
+                                                   paste0("\tThe two files can be merged successfully without losing any records."))
   } else {
     if (nrow(missing_in_df2) > 0) {
       unmatchable_fields_df2 <- sapply(names(missing_in_df2), function(x) {
