@@ -77,10 +77,10 @@ clamLog_QC <- function(logFolder = NULL, ...){
         MinDate = min(.data$`DATE`, na.rm = TRUE),
         MaxDate = max(.data$`DATE`, na.rm = TRUE)
       ) |> as.data.frame()
-    creds<- getCreds(clam.username = params$clam.username,clam.password = params$clam.password,clam.dsn = params$clam.dsn, usepkg = params$usepkg)
-    vmsRecs <- suppressMessages(Mar.utils::VMS_get_recs(fn.oracle.username = creds$us,fn.oracle.password = creds$pw,fn.oracle.dsn = creds$dsn,usepkg = creds$pkg, 
-                                       dateStart = vmsRecs$MinDate, dateEnd = vmsRecs$MaxDate ,vrnList = vmsRecs$VRN))
+    vmsRecs <- suppressMessages(Mar.utils::VMS_get_recs(cxn = params$cxn, dateStart = vmsRecs$MinDate, 
+                                                        dateEnd = vmsRecs$MaxDate ,vrnList = vmsRecs$VRN))
     vmsRecs<-suppressMessages(Mar.utils::VMS_clean_recs(vmsRecs))
+    vmsRecs<<-vmsRecs
     vmsRecs_sf<- suppressMessages(Mar.utils::make_segments(df = vmsRecs, filename = "logBookVMS", objField = "VR_NUMBER",seqField = "POSITION_UTC_DATE", points="none", gpkgName = params$gpkgName, path=params$resultsFolder))
     
   }

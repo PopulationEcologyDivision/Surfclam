@@ -45,32 +45,6 @@ override_params <- function(func_params) {
   return(params)
 }
 
-#' getCreds
-#' This function just provides a reusable mechanism for working with Oracle credentials
-#' @param ...  Additional arguments passed on to other functions.
-#'
-#' @return list
-getCreds <- function(...){
-  func_params <- list(...)
-  params <- override_params(func_params)
-  if (params$debug) Mar.utils::where_now()
-  
-  if (any(is.null(params$clam.username), is.null(params$clam.password), is.null(params$clam.dsn), is.null(params$usepkg))){
-    message("To avoid being prompted for your oracle information, you can provide it via the parameters 'clam.username', 'clam.password', 'clam.dsn' and 'usepkg'")
-  }
-  
-  clam.username <- ifelse(!is.null(params$clam.username),params$clam.username, readline(prompt="Please enter an oracle username with permission to the CLAM schema: "))
-  clam.password <- ifelse(!is.null(params$clam.password),params$clam.password, readline(prompt="Please enter the password for that account: "))
-  clam.dsn <- ifelse(!is.null(params$clam.dsn),params$clam.dsn, readline(prompt="Please enter the datasource name (likely something like ptran): "))
-  usepkg <- ifelse(!is.null(params$usepkg),params$usepkg, utils::select.list(c("roracle","rodbc"), multiple=F, graphics=T, title='Please select how you connect to Oracle:'))
-  creds <-list()
-  creds$us <-clam.username
-  creds$pw <-clam.password
-  creds$dsn <-clam.dsn
-  creds$pkg <-usepkg
-  # cxn <- Mar.utils::make_oracle_cxn(usepkg = usepkg, fn.oracle.username = clam.username, fn.oracle.password = clam.password, fn.oracle.dsn = clam.dsn)
-  return(creds)
-}
 
 #' df.diff
 #' This function find records that are different between 2 identically formatted 

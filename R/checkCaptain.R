@@ -14,13 +14,14 @@ checkCaptain <- function(chkDf=NULL, output_messages = NULL, issues=NULL, ...){
   
   res<-list()
   cxn <- params$cxn
+  thecmd <- Mar.utils::connectionCheck(cxn)
   qry <- "SELECT UPPER(NAME) CAPTAIN, START_YEAR FROM CLAM.CLAMWORKER WHERE WORKTYPE = 'SHIP CAPTAIN'"
   if ("ID" %in% names(chkDf)){
     fields<- c("ID", "CAPTAIN")
   }else{
     fields<- c("CAPTAIN")
   }
-  captains = cxn$thecmd(cxn$channel, qry, rows_at_time = 1)
+  captains = thecmd( params$cxn, qry, rows_at_time = 1)
   invalidCaptains <- chkDf[!toupper(chkDf$CAPTAIN) %in% captains$CAPTAIN, fields, F]
   if (nrow(invalidCaptains)<1){
     if(params$show.passed.checks)  output_messages <- c(output_messages, params$lineSep,

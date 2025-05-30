@@ -51,9 +51,8 @@ CW_handleRecord <- function(chkDf=NULL,layer_name = NULL,...){
         MinDate = min(.data$`RECORD DATE`, na.rm = TRUE),
         MaxDate = max(.data$`RECORD DATE`, na.rm = TRUE)
       ) |> as.data.frame()
-    creds<- getCreds(clam.username = params$clam.username,clam.password = params$clam.password,clam.dsn = params$clam.dsn, usepkg = params$usepkg)
-    vmsRecs <- suppressMessages(Mar.utils::VMS_get_recs(fn.oracle.username = creds$us,fn.oracle.password = creds$pw,fn.oracle.dsn = creds$dsn,usepkg = creds$pkg, 
-                                       dateStart = vmsRecs$MinDate, dateEnd = vmsRecs$MaxDate ,vrnList = vmsRecs$CFV))
+    vmsRecs <- suppressMessages(Mar.utils::VMS_get_recs(cxn = params$cxn, dateStart = vmsRecs$MinDate, 
+                                                        dateEnd = vmsRecs$MaxDate ,vrnList = vmsRecs$CFV))
     vmsRecs<-suppressMessages(Mar.utils::VMS_clean_recs(vmsRecs))
     vmsRecs_sf<- suppressMessages(Mar.utils::make_segments(df = vmsRecs, filename = "CWVMS", objField = "VR_NUMBER",seqField = "POSITION_UTC_DATE", points="none", gpkgName = params$gpkgName, path=params$resultsFolder))
 

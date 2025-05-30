@@ -26,10 +26,7 @@ clamQC
 test <- clamQC(cwFolder = "C:/Original CW Log Data/2023/2023BC Q1&Q2/",
 logFolder = "C:/HailedOnboardLogData/2023/BC/",
 resultsFolder = "C:/exampleOutput/", 
-clam.username= oracle.username, 
-clam.password=oracle.password, 
-clam.dsn="ptran", 
-usepkg="roracle", 
+cxn = <oracle connection>>, 
 offline=F, debug=F,
 gpkgName = "example.gpkg")
 }

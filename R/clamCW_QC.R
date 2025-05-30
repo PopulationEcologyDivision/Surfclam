@@ -46,7 +46,7 @@ clamCW_QC <- function(cwFolder = NULL, ...){
   
   file_list <- unlist(file_list)
   df_list <- list()
-  
+
   for (f in 1:length(file_list)){
     this <- clamCW_QC_file(file = file_list[f], layerPrefix = parent_cwFolder, cxn=params$cxn,rightNow = rightNow,...)
     file_type <- tools::file_path_sans_ext(basename(file_list[f]))
