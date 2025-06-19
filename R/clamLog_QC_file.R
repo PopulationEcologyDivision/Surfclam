@@ -34,21 +34,33 @@ clamLog_QC_file <- function(file = NULL, output = NULL, issues = NULL,...){
   if (doh | is.null(wb)){
     stop("!! Could not access ",file,". If the file below is open, please close it and try again.")
   }
-  
   res<- list()
   layer_name <- tools::file_path_sans_ext(basename(file))
   xl_raw<-openxlsx2::wb_to_df(wb)
+  
+  # print(ncol(xl_raw))
+  # if (file =="C:/Users/mcmahonm/OneDrive - DFO-MPO/Bravo, Monica (DFO_MPO)'s files - Mike & Clams/2024AELogs/AE Cdn Clam DFO Log Dec 13-Dec 16  Revised.xlsx") browser()
+  # if (file =="C:/Users/mcmahonm/OneDrive - DFO-MPO/Bravo, Monica (DFO_MPO)'s files - Mike & Clams/2024AELogs/AE Cdn Clam DFO Log Dec 17-Dec 20  Revised.xlsx") browser()
   xl_meta <- xl_raw[1,]
-  names(xl_meta) <- c("TRIP YEAR", "TRIPNO", "VESS_NAME", "CRAP", "VRN", "CRAP", "CRAP", "LICENCE","CRAP","CRAP","CAPTAIN", 
-                      "CRAP","CRAP","CRAP","CRAP", "CRAP", "NO_DREDGES", "CRAP", "CRAP","CRAP", "CRAP", "CRAP", "CRAP" )
+  
+  if (ncol(xl_meta)==23){
+    names(xl_meta) <- c("TRIP YEAR", "TRIPNO", "VESS_NAME", "CRAP", "VRN", "CRAP", "CRAP", "LICENCE","CRAP","CRAP","CAPTAIN", "CRAP","CRAP","CRAP","CRAP", "CRAP", "NO_DREDGES", "CRAP", "CRAP","CRAP", "CRAP", "CRAP", "CRAP" )
+  }else if (ncol(xl_meta)==21){
+    names(xl_meta) <- c("TRIP YEAR", "TRIPNO", "VESS_NAME", "VRN", "CRAP", "LICENCE","CRAP","CRAP","CAPTAIN", "CRAP","CRAP","CRAP","CRAP", "CRAP", "NO_DREDGES", "CRAP", "CRAP","CRAP", "CRAP", "CRAP", "CRAP" )
+  }else{
+    stop("Issue with ",file)  
+  }
   xl_meta_cln <- xl_meta[, !grepl("^CRAP", names(xl_meta))]
   xl_meta_cln <- data.frame(lapply(xl_meta_cln, function(x) sub(".*: ", "", x)))
   colnames(xl_meta_cln)[colnames(xl_meta_cln)=="TRIP.YEAR"] <- "TRIP YEAR"
-
-  
   xl_dat <- xl_raw[8:(nrow(xl_raw)-2),]
-  names(xl_dat)<-c("DATE", "TIME", "POS", "CRAP", "NAFO", "CRAP", "WATCH", "CRAP","AVG_DEP","ONE_DREDGE","TWO_DREDGE", 
-                   "CRAP","AVG_BOT_TIME","AVG_SPEED","SC_RAW", "SC_BLANCH", "SC_CGRADE", "COOC_SC", "COOC_COCKLES","COOC_QUAHOGS", "COOC_PROPCLAMS", "COOC_RECOVERY", "REMARKS" )
+  if (ncol(xl_meta)==23){
+    names(xl_dat)<-c("DATE", "TIME", "POS", "CRAP", "NAFO", "CRAP", "WATCH", "CRAP","AVG_DEP","ONE_DREDGE","TWO_DREDGE", "CRAP","AVG_BOT_TIME","AVG_SPEED","SC_RAW", "SC_BLANCH", "SC_CGRADE", "COOC_SC", "COOC_COCKLES","COOC_QUAHOGS", "COOC_PROPCLAMS", "COOC_RECOVERY", "REMARKS" )
+    
+  }else{
+    names(xl_dat)<-c("DATE", "TIME", "POS", "NAFO", "WATCH", "CRAP","AVG_DEP","ONE_DREDGE","TWO_DREDGE","AVG_BOT_TIME","AVG_SPEED","SC_RAW", "SC_BLANCH", "CRAP", "SC_CGRADE", "COOC_SC", "COOC_COCKLES","COOC_QUAHOGS", "COOC_PROPCLAMS", "COOC_RECOVERY", "REMARKS" )
+    
+  }
   xl_dat <- xl_dat[, !grepl("^CRAP", names(xl_dat))]
   xl_dat <- tidyr::fill(xl_dat, "DATE")
   
@@ -60,7 +72,7 @@ clamLog_QC_file <- function(file = NULL, output = NULL, issues = NULL,...){
   xl_dat$`LONGITUDE INIT` <- gsub(" W", "", xl_dat$`LONGITUDE INIT`)
   
   log_data <- merge(xl_meta_cln, xl_dat, all = TRUE)
-
+  
   
   return(log_data)
 }

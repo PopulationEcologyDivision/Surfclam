@@ -11,7 +11,6 @@ clamCompLogCW<-function(clamCW=NULL, clamLog=NULL,...){
   func_params <- list(...)
   params <- override_params(func_params)
   if (params$debug) Mar.utils::where_now()
-  
   rightNow <- params$rightNow
   output_CWLOG_File <-file.path(params$resultsFolder, paste0("QC_CWLOG.txt"))
   output_CWLOG <- c(params$lineSep, params$resultsFolder, paste("Checked: ", format(rightNow, "%Y-%m-%d %H:%M")))
@@ -65,8 +64,13 @@ clamCompLogCW<-function(clamCW=NULL, clamLog=NULL,...){
   wt_chk<-merge(cwRecProdJoin, clamLog, all=T, by = c("TRIP YEAR","RECORD DATE", "RECORD NO", "CFV"))
   log_wt_cols <- c("COOC_COCKLES","SC_BLANCH","SC_CGRADE","COOC_PROPCLAMS","COOC_RECOVERY","COOC_QUAHOGS" )
   cw_wt_cols <- c("80879_16","80983_16","80983_25","81763_23","80983_26","81343_16")
+  
+  log_wt_cols <- log_wt_cols[log_wt_cols %in% names(wt_chk)]
   wt_chk[log_wt_cols] <- lapply(wt_chk[log_wt_cols], function(x) utils::type.convert(as.character(x), as.is = TRUE))
-  wt_chk[cw_wt_cols] <- lapply(wt_chk[cw_wt_cols], function(x) utils::type.convert(as.character(x), as.is = TRUE))
+
+  
+    cw_wt_cols <- cw_wt_cols[cw_wt_cols %in% names(wt_chk)]
+    wt_chk[cw_wt_cols] <- lapply(wt_chk[cw_wt_cols], function(x) utils::type.convert(as.character(x), as.is = TRUE))
   
   wt_chk$TOT_LOG <- round(rowSums(wt_chk[,log_wt_cols], na.rm = T),0)
   wt_chk$TOT_CW <-  round(rowSums(wt_chk[,cw_wt_cols], na.rm = T),0)

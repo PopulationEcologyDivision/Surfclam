@@ -1,7 +1,7 @@
 Package: Surfclam
 Type: Package
 Title: Surfclam
-Version: 2024.08.01
+Version: 2025.06.19
 Author: Mike McMahon <Mike.McMahon@dfo-mpo.gc.ca>
 Maintainer: Mike McMahon <Mike.McMahon@dfo-mpo.gc.ca>
 Description: All things surfclam.
